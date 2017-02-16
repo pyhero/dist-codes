@@ -1,0 +1,67 @@
+#!/bin/bash
+#-- sync codes to ser.
+#-- Xu Panda
+#-- 2015-11-10
+
+## Define env first:
+# online
+env=ol
+
+[ -z $env ] && exit 2
+
+DIR=$(cd `dirname $0`;echo $PWD)
+conf_dir=$DIR/xconfig
+exclude=$conf_dir/exclude.conf
+for conf in help position apps ip svn dir;do
+        file=$conf_dir/${conf}.conf
+        if [ ! -f $file ];then
+                echo "$file:doesn't exist!"
+                exit 2
+        else
+                . $file
+        fi
+done
+
+get_codes () {
+	ROOT="/ROOT/www"
+	src="$code_dir/$dom"
+	des="$ROOT/$dom"
+	mkdir -p $src && cd $src
+	[ ! -z $fwurl ] && svn co $fwurl framework
+}
+
+modify_codes () {
+	chown -R www framework/system/config/bbs_*.php 2> /dev/null
+}
+
+sync_codes () {
+	if [ ! -z ${files[2]} ];then
+		num=2
+		for f in ${files[@]};do
+			if [ ! -f $f ];then
+				echo -e "\e[31m$src/$f\e[0m: Doesn't exist!"
+				exit 2
+			fi
+			src_from[$num]=$src/$f
+			des_to[$num]=$ROOT/$dom/$f
+			num=$[$num+1]
+		done
+	else
+		src_from[2]=$src/framework
+		des_to[2]=$des
+	fi
+	for ip in $ips;do
+		echo -e "\n\e[32m$ip:\e[0m"
+		for ((n=2;n<=$file_nums;n++));do
+			rsync --exclude-from=$exclude -avze ssh ${src_from[$n]} $ip:${des_to[$n]}
+		done
+	done
+}
+
+doit () {
+	get_codes
+	modify_codes
+	sync_codes
+}
+
+. $conf_dir/doit.conf

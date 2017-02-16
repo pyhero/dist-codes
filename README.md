@@ -1,2 +1,4 @@
 # dist-codes
-code dist
+
+* shell codes dist system
+* dist codes to online/test/pre

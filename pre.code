@@ -1,0 +1,19 @@
+#!/bin/bash
+#-- sync codes to ser.
+#-- Xu Panda
+#-- 2015-11-10
+
+## Define env first:
+# online
+#env=ol
+# pre-release
+env=pre
+# static-dist
+#env=dist
+
+[ -z $env ] && exit 2
+
+DIR=$(cd `dirname $0`;echo $PWD)
+global_functions="$DIR/xconfig/global.conf"
+[ ! -f $global_functions ] && exit 2
+. $global_functions
